@@ -1,18 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { SignalingService } from '../services/signaling';
 
-function resolveIceServers() {
-  const defaultStun = [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' }
-  ];
+const DEFAULT_ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' }
+];
 
-  const envStun = typeof import.meta !== 'undefined' && import.meta.env?.VITE_STUN_URLS;
-  const stunServers = envStun
-    ? envStun.split(',').map(u => ({ urls: u.trim() })).filter(s => s.urls)
-    : defaultStun;
-
+async function fetchIceServers() {
+  // 1. Check frontend VITE_TURN_* env vars first if set
   const envTurnUrls = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_TURN_URLS || import.meta.env?.VITE_TURN_URL);
   const envTurnUser = typeof import.meta !== 'undefined' && import.meta.env?.VITE_TURN_USERNAME;
   const envTurnCred = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_TURN_CREDENTIAL || import.meta.env?.VITE_TURN_PASSWORD);
@@ -22,10 +18,29 @@ function resolveIceServers() {
     const turnServer = { urls };
     if (envTurnUser) turnServer.username = envTurnUser;
     if (envTurnCred) turnServer.credential = envTurnCred;
-    return [...stunServers, turnServer];
+    return [...DEFAULT_ICE_SERVERS, turnServer];
   }
 
-  return stunServers;
+  // 2. Otherwise fetch live STUN + Metered TURN credentials from backend /api/ice-servers
+  const apiBase = (
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+    'https://deepfake-audio-backend-h3g9.onrender.com'
+  ).replace(/\/+$/, '');
+
+  try {
+    const res = await fetch(`${apiBase}/api/ice-servers`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.iceServers) && data.iceServers.length > 0) {
+        console.log('[WebRTC] Loaded ICE servers from backend:', data.iceServers.length);
+        return data.iceServers;
+      }
+    }
+  } catch (err) {
+    console.warn('[WebRTC] Failed to fetch /api/ice-servers, falling back to default STUN:', err);
+  }
+
+  return DEFAULT_ICE_SERVERS;
 }
 
 export function useWebRTC({ roomId, clientId, onRemoteStream }) {
@@ -48,8 +63,8 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
   const activeRoomIdRef = useRef(roomId);
   const activeClientIdRef = useRef(clientId);
   const isCreatingOfferRef = useRef(false);
+  const iceServersRef = useRef(DEFAULT_ICE_SERVERS);
 
-  // Synchronize ref with prop updates
   useEffect(() => {
     activeRoomIdRef.current = roomId;
   }, [roomId]);
@@ -89,16 +104,12 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.error(
-        '[WebRTC] navigator.mediaDevices unavailable! Open via http://localhost:5173 or enable chrome://flags/#unsafely-treat-insecure-origin-as-secure for this IP.'
-      );
       const fallbackStream = createSyntheticMediaStream();
       localStreamRef.current = fallbackStream;
       setLocalStream(fallbackStream);
       return fallbackStream;
     }
 
-    // Tier 1: Ideal constraints (16kHz audio for detection engine + 720p video)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -120,7 +131,6 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
       console.warn('[WebRTC] Ideal media constraints failed, attempting basic constraints:', err1);
     }
 
-    // Tier 2: Basic audio + video
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
       localStreamRef.current = stream;
@@ -130,7 +140,6 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
       console.warn('[WebRTC] Basic audio/video failed, attempting audio only:', err2);
     }
 
-    // Tier 3: Audio only with canvas video track
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       const canvas = document.createElement('canvas');
@@ -152,7 +161,6 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
       console.warn('[WebRTC] Media devices unavailable, utilizing silent fallback stream:', err3);
     }
 
-    // Tier 4: Silent AudioContext + Canvas stream fallback
     const fallbackStream = createSyntheticMediaStream();
     localStreamRef.current = fallbackStream;
     setLocalStream(fallbackStream);
@@ -182,7 +190,8 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
     }
 
     const pc = new RTCPeerConnection({
-      iceServers: resolveIceServers()
+      iceServers: iceServersRef.current,
+      iceCandidatePoolSize: 10
     });
 
     pc.onicecandidate = (event) => {
@@ -261,6 +270,8 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
     activeRoomIdRef.current = activeRoom;
     activeClientIdRef.current = activeClient;
 
+    // Fetch TURN + STUN servers BEFORE creating RTCPeerConnection
+    iceServersRef.current = await fetchIceServers();
     await startLocalMedia();
 
     iceCandidatesQueueRef.current = [];
@@ -279,7 +290,6 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
         console.log(`[WebRTC Signaling] Received msg:`, msg.type, msg);
         const currentPC = getActivePeerConnection();
 
-        // --- CASE 1: Another user joined the room -> Initiate SDP Offer ---
         if (msg.type === 'user-joined') {
           const joiningClientId = msg.clientId || msg.sender;
           if (joiningClientId === activeClient) return;
@@ -308,10 +318,7 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
           } finally {
             isCreatingOfferRef.current = false;
           }
-        }
-
-        // --- CASE 2: Incoming SDP Offer ---
-        else if (msg.type === 'offer') {
+        } else if (msg.type === 'offer') {
           const senderId = msg.sender || msg.client_id;
           console.log(`[WebRTC] Received SDP offer from ${senderId}`);
           remotePeerIdRef.current = senderId;
@@ -331,10 +338,7 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
             client_id: activeClient
           });
           console.log(`[WebRTC] Sent SDP answer to ${senderId}`);
-        }
-
-        // --- CASE 3: Incoming SDP Answer ---
-        else if (msg.type === 'answer') {
+        } else if (msg.type === 'answer') {
           console.log(`[WebRTC] Received SDP answer`);
           if (currentPC.signalingState === 'have-local-offer') {
             await currentPC.setRemoteDescription(new RTCSessionDescription(msg.sdp));
@@ -343,10 +347,7 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
           } else {
             console.warn(`[WebRTC] Received answer but signalingState is ${currentPC.signalingState}`);
           }
-        }
-
-        // --- CASE 4: Incoming ICE Candidate ---
-        else if (msg.type === 'candidate' && msg.candidate) {
+        } else if (msg.type === 'candidate' && msg.candidate) {
           if (currentPC.remoteDescription && currentPC.remoteDescription.type) {
             try {
               await currentPC.addIceCandidate(new RTCIceCandidate(msg.candidate));
@@ -356,10 +357,7 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
           } else {
             iceCandidatesQueueRef.current.push(msg.candidate);
           }
-        }
-
-        // --- CASE 5: User Left ---
-        else if (msg.type === 'user-left') {
+        } else if (msg.type === 'user-left') {
           const leftId = msg.clientId || msg.sender;
           console.log(`[WebRTC] User left:`, leftId);
           if (!remotePeerIdRef.current || remotePeerIdRef.current === leftId) {
@@ -369,8 +367,6 @@ export function useWebRTC({ roomId, clientId, onRemoteStream }) {
             setParticipantsCount(1);
             setConnectionStatus('STANDBY');
             iceCandidatesQueueRef.current = [];
-
-            // Re-prepare clean peer connection for next peer
             createPeerConnection(activeRoom, activeClient);
           }
         }

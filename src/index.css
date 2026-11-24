@@ -1,0 +1,1364 @@
+/* ==========================================================================
+   Voice Authenticator — SaaS Design System & Stylesheet
+   Inspired by Linear, Slack, and Notion design principles
+   ========================================================================== */
+
+:root {
+  /* Core Palette — Refined Light Mode */
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-hover: #e2e8f0;
+
+  /* Borders */
+  --border-color: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-focus: #4f46e5;
+
+  /* Primary Brand (Indigo) */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-subtle: #eef2ff;
+  --primary-text: #4338ca;
+
+  /* Semantic States */
+  --authentic: #059669;
+  --authentic-subtle: #ecfdf5;
+  --authentic-border: #a7f3d0;
+  --authentic-text: #065f46;
+
+  --synthetic: #e11d48;
+  --synthetic-subtle: #fff1f2;
+  --synthetic-border: #fecdd3;
+  --synthetic-text: #9f1239;
+
+  --warning: #d97706;
+  --warning-subtle: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
+
+  --neutral-muted: #64748b;
+  --neutral-subtle: #f1f5f9;
+
+  /* Typography */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"], body.dark {
+  /* Core Palette — Refined Dark Mode (Obsidian / Slate) */
+  --bg-app: #080c14;
+  --bg-surface: #0e1524;
+  --bg-elevated: #141d30;
+  --bg-subtle: #172238;
+  --bg-hover: #1e2c47;
+
+  /* Borders */
+  --border-color: #1c273c;
+  --border-subtle: #151f32;
+  --border-focus: #6366f1;
+
+  /* Primary Brand (Indigo) */
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --primary-subtle: rgba(99, 102, 241, 0.12);
+  --primary-text: #a5b4fc;
+
+  /* Semantic States */
+  --authentic: #10b981;
+  --authentic-subtle: rgba(16, 185, 129, 0.12);
+  --authentic-border: rgba(16, 185, 129, 0.25);
+  --authentic-text: #34d399;
+
+  --synthetic: #f43f5e;
+  --synthetic-subtle: rgba(244, 63, 94, 0.12);
+  --synthetic-border: rgba(244, 63, 94, 0.25);
+  --synthetic-text: #fb7185;
+
+  --warning: #f59e0b;
+  --warning-subtle: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.25);
+  --warning-text: #fcd34d;
+
+  --neutral-muted: #94a3b8;
+  --neutral-subtle: #172238;
+
+  /* Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   Base & Reset
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* App Root Container — Natural Flex Scrolling Architecture */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-app);
+}
+
+/* ==========================================================================
+   Header / Navigation (Navbar.jsx)
+   ========================================================================== */
+
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  padding: 0 20px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 16px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  user-select: none;
+}
+
+.nav-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background-color: var(--primary);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.nav-brand-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--primary-subtle);
+  color: var(--primary-text);
+  margin-left: 2px;
+}
+
+/* Center Segmented Tabs */
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-subtle);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  gap: 2px;
+}
+
+.nav-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.nav-tab-btn.active {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+
+/* Right Nav Controls */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Call Session Pill (Visible only during active call) */
+.nav-call-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.nav-call-pill .status-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--neutral-muted);
+}
+
+.nav-call-pill .status-indicator.connected {
+  background-color: var(--authentic);
+  box-shadow: 0 0 6px var(--authentic);
+}
+
+.nav-call-pill .status-indicator.connecting {
+  background-color: var(--warning);
+}
+
+.nav-call-pill .room-tag {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nav-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nav-icon-btn:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+/* ==========================================================
+   Lobby / Join Call Screen (RoomForm.jsx)
+   ========================================================== */
+
+.lobby-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.join-card {
+  width: 100%;
+  max-width: 390px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.join-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.join-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-subtle);
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.join-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.join-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.input-inline-btn {
+  position: absolute;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--primary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.input-inline-btn:hover {
+  background-color: var(--primary-subtle);
+}
+
+.btn-join {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  width: 100%;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform 50ms ease;
+  margin-top: 4px;
+}
+
+.btn-join:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-join:active {
+  transform: scale(0.99);
+}
+
+/* ==========================================================================
+   Live Call Dashboard Layout
+   ========================================================================== */
+
+.live-call-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr);
+  gap: 20px;
+  padding: 20px 24px;
+  max-width: 1560px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Left Column: Video Stage */
+.video-stage-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.video-frame-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #030712;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.remote-video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Waiting State when Alone in Room */
+.video-empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #94a3b8;
+  background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+  user-select: none;
+}
+
+.video-empty-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #64748b;
+}
+
+.video-empty-state p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* Floating Picture-In-Picture for Local User */
+.pip-video-container {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  width: 170px;
+  aspect-ratio: 16 / 9;
+  background-color: #0b0f19;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+}
+
+.local-video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1); /* Mirror local camera */
+}
+
+.pip-tag {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+/* Bottom Identity Tag on Remote Video */
+.remote-tag {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  padding: 3px 10px;
+  border-radius: var(--radius-md);
+  background-color: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remote-tag .peer-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--authentic);
+}
+
+/* Call Control Bar */
+.call-controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ctrl-btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--text-muted);
+}
+
+.ctrl-btn.muted {
+  background-color: var(--warning-subtle);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}
+
+.ctrl-btn.active-share {
+  background-color: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.ctrl-btn.danger {
+  background-color: var(--synthetic);
+  border-color: var(--synthetic);
+  color: #ffffff;
+  margin-left: 8px;
+}
+
+.ctrl-btn.danger:hover {
+  background-color: #be123c;
+}
+
+/* ==========================================================================
+   Right Column: AI Audio Detection Panel
+   ========================================================================== */
+
+.detection-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-badge.standby {
+  background-color: var(--neutral-subtle);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+.status-badge.buffering {
+  background-color: var(--primary-subtle);
+  color: var(--primary-text);
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+.status-badge.authentic {
+  background-color: var(--authentic-subtle);
+  color: var(--authentic-text);
+  border-color: var(--authentic-border);
+}
+
+.status-badge.synthetic {
+  background-color: var(--synthetic-subtle);
+  color: var(--synthetic-text);
+  border-color: var(--synthetic-border);
+}
+
+.status-badge.warning {
+  background-color: var(--warning-subtle);
+  color: var(--warning-text);
+  border-color: var(--warning-border);
+}
+
+.status-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Linear Authenticity Confidence Meter */
+.meter-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meter-labels-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.meter-label-left {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--authentic);
+}
+
+.meter-label-right {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--synthetic);
+}
+
+.meter-track {
+  height: 8px;
+  width: 100%;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  display: flex;
+}
+
+.meter-fill-authentic {
+  height: 100%;
+  background-color: var(--authentic);
+  transition: width 300ms ease;
+}
+
+.meter-fill-synthetic {
+  height: 100%;
+  background-color: var(--synthetic);
+  transition: width 300ms ease;
+}
+
+/* Clean Waveform Monitor */
+.waveform-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.waveform-canvas {
+  width: 100%;
+  height: 72px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  display: block;
+}
+
+/* Telemetry Metrics Grid */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.metric-card-compact {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.metric-card-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.metric-card-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+/* Recent Events Console */
+.event-log-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.log-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-subtle);
+  font-size: 0.76rem;
+}
+
+.log-entry-time {
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+}
+
+.log-entry-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.log-entry-msg {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Live Model Selection in AIDetectionPanel */
+.live-model-selector-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.live-model-btn-group {
+  display: flex;
+  width: 100%;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 3px;
+}
+
+.live-model-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.73rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.live-model-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.live-model-btn.active {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+  border-color: var(--border-color);
+}
+
+.live-model-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: var(--radius-full);
+  background-color: var(--warning-subtle);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-border);
+  line-height: 1;
+}
+
+.live-model-telemetry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.live-model-telemetry strong {
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   File Detector Standalone View (AudioDetectorView.jsx)
+   ========================================================================== */
+
+.detector-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.detector-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detector-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+}
+
+.detector-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.detector-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  max-width: 640px;
+}
+
+/* Model Selector Segmented Group */
+.model-toggle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.model-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.model-option-card:hover {
+  border-color: var(--border-focus);
+}
+
+.model-option-card.selected {
+  border-color: var(--primary);
+  background-color: var(--primary-subtle);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.model-radio {
+  margin-top: 2px;
+}
+
+.model-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.model-option-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.model-badge-exp {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--warning-subtle);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-border);
+}
+
+.model-option-desc {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+/* Upload & Record Area */
+.input-method-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+}
+
+.dropzone-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  border: 1.5px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-surface);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.dropzone-box:hover {
+  border-color: var(--primary);
+  background-color: var(--bg-subtle);
+}
+
+.dropzone-box.has-file {
+  border-color: var(--authentic);
+  background-color: var(--authentic-subtle);
+}
+
+.dropzone-icon {
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.dropzone-main-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dropzone-sub-text {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Mic Recorder Box */
+.mic-record-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  gap: 8px;
+}
+
+.mic-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-subtle);
+  color: var(--primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mic-action-btn:hover {
+  background-color: var(--primary-subtle);
+  transform: scale(1.05);
+}
+
+.mic-action-btn.recording {
+  background-color: var(--synthetic);
+  color: #ffffff;
+  animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(225, 29, 72, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+}
+
+.mic-box-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mic-box-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* Audio Player Preview Bar */
+.selected-audio-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  gap: 12px;
+}
+
+.selected-audio-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.selected-audio-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.selected-audio-size {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.btn-remove-audio {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.btn-remove-audio:hover {
+  color: var(--synthetic);
+}
+
+/* Primary Analyze Button */
+.btn-analyze-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  width: 100%;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform 50ms ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-analyze-submit:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.btn-analyze-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Result Presentation Card */
+.result-display-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.result-verdict-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+}
+
+.result-verdict-banner.authentic {
+  background-color: var(--authentic-subtle);
+  border-color: var(--authentic-border);
+  color: var(--authentic-text);
+}
+
+.result-verdict-banner.synthetic {
+  background-color: var(--synthetic-subtle);
+  border-color: var(--synthetic-border);
+  color: var(--synthetic-text);
+}
+
+.result-verdict-banner.warning {
+  background-color: var(--warning-subtle);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}
+
+.result-verdict-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.result-verdict-subtitle {
+  font-size: 0.78rem;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.meta-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-md);
+}
+
+.meta-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-info-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.meta-info-val {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1px;
+}
+
+/* Collapsible Information Accordion */
+.details-expander {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  overflow: hidden;
+}
+
+.details-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.details-summary:hover {
+  background-color: var(--bg-subtle);
+}
+
+.details-content {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  background-color: var(--bg-subtle);
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+
+@media (max-width: 960px) {
+  .live-call-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 14px;
+  }
+
+  .input-method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meta-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-navbar {
+    padding: 0 12px;
+  }
+
+  .nav-brand span {
+    display: none;
+  }
+
+  .model-toggle-row {
+    grid-template-columns: 1fr;
+  }
+
+  .detector-container {
+    padding: 16px 12px 36px;
+  }
+
+  .pip-video-container {
+    width: 120px;
+  }
+}
